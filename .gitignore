@@ -12,4 +12,7 @@ xcuserdata
 DerivedData/
 .DS_Store
 
+### Resources
+Public/Resources/
+
 # End of https://www.gitignore.io/api/vapor
