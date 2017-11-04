@@ -6,6 +6,17 @@
 //
 
 import PostgreSQLProvider
+import Foundation
+
+extension Droplet {
+    static var publicDirectoryURL: URL {
+        return URL(fileURLWithPath: workingDirectory()).appendingPathComponent("Public", isDirectory: true)
+    }
+    
+    static var resourcesDirectory: String {
+        return "Resources"
+    }
+}
 
 final class UserController {
     func getAll(request: Request) throws -> ResponseRepresentable {
@@ -48,6 +59,35 @@ extension UserController: ResourceRepresentable {
             update: update,
             destroy: delete
         )
+    }
+}
+
+extension UserController {
+    func addRoutes(_ droplet: Droplet) {
+        let usersGroup = droplet.grouped("users")
+        usersGroup.post(User.parameter, "avatar", handler: uploadAvatar)
+    }
+    
+    func uploadAvatar(request: Request) throws -> ResponseRepresentable {
+        guard let fileBytes = request.formData?["avatar"]?.part.body,
+            let fileExtension = request.data["extension"]?.string else {
+            throw Abort.badRequest
+        }
+        
+        let fileName = UUID().uuidString + "." + fileExtension
+        let fileURL = Droplet.publicDirectoryURL.appendingPathComponent(Droplet.resourcesDirectory, isDirectory: true).appendingPathComponent(fileName)
+        
+        do {
+            let data = Data(bytes: fileBytes)
+            try data.write(to: fileURL)
+        } catch {
+            throw Abort.serverError
+        }
+        
+        // TODO: Save to User property before returning
+        let port = request.uri.port ?? 80
+        let avatarURLString = request.uri.scheme + "://" + request.uri.hostname + ":\(port)" + "/" + Droplet.resourcesDirectory + "/" + fileName
+        return try JSON(node: ["avatar" : avatarURLString])
     }
 }
 

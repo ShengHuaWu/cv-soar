@@ -4,5 +4,6 @@ extension Droplet {
     func setupRoutes() throws {
         let userController = UserController()
         resource("users", userController)
+        userController.addRoutes(self)
     }
 }
