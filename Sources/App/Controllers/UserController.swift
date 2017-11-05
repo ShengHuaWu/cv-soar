@@ -69,6 +69,7 @@ extension UserController {
     }
     
     func uploadAvatar(request: Request) throws -> ResponseRepresentable {
+        // TODO: File storing needs moving into another class
         guard let fileBytes = request.formData?["avatar"]?.part.body,
             let fileExtension = request.data["extension"]?.string else {
             throw Abort.badRequest
@@ -84,10 +85,11 @@ extension UserController {
             throw Abort.serverError
         }
         
-        // TODO: Save to User property before returning
+        let user = try request.parameters.next(User.self)
         let port = request.uri.port ?? 80
-        let avatarURLString = request.uri.scheme + "://" + request.uri.hostname + ":\(port)" + "/" + Droplet.resourcesDirectory + "/" + fileName
-        return try JSON(node: ["avatar" : avatarURLString])
+        user.avatar = request.uri.scheme + "://" + request.uri.hostname + ":\(port)" + "/" + Droplet.resourcesDirectory + "/" + fileName
+        try user.save()
+        return try user.makeJSON()
     }
 }
 
