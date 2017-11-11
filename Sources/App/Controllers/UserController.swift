@@ -8,13 +8,13 @@
 import PostgreSQLProvider
 import Foundation
 
-extension Droplet {
-    static var publicDirectoryURL: URL {
-        return URL(fileURLWithPath: workingDirectory()).appendingPathComponent("Public", isDirectory: true)
-    }
-}
-
 final class UserController {
+    private let fileManager: StaticFileManager
+    
+    init(fileManager: StaticFileManager = StaticFileManager()) {
+        self.fileManager = fileManager
+    }
+    
     func getAll(request: Request) throws -> ResponseRepresentable {
         return try User.all().makeJSON()
     }
@@ -66,7 +66,6 @@ extension UserController {
     }
     
     func uploadAvatar(request: Request) throws -> ResponseRepresentable {
-        // TODO: File storing needs moving into another class
         guard let fileBytes = request.formData?["avatar"]?.part.body,
             let fileExtension = request.data["extension"]?.string else {
             throw Abort.badRequest
@@ -74,22 +73,13 @@ extension UserController {
         
         let user = try request.parameters.next(User.self)
         // Remove previous avatar image
-        if let avatar = user.avatar, !avatar.isEmpty {
-            let avatarURL = Droplet.publicDirectoryURL.appendingPathExtension(avatar)
-            let fileManager = FileManager.default
-            var isDirectory: ObjCBool = false
-            if fileManager.fileExists(atPath: avatarURL.path, isDirectory: &isDirectory) {
-                if !isDirectory.boolValue {
-                    try fileManager.removeItem(at: avatarURL)
-                }
-            }
+        if let avatarURL = user.avatarURL, fileManager.fileExist(at: avatarURL) {
+            try fileManager.removeFile(at: avatarURL)
         }
         
         // Save new avatar image
         let fileName = UUID().uuidString + "." + fileExtension
-        let fileURL = Droplet.publicDirectoryURL.appendingPathComponent(fileName)
-        let data = Data(bytes: fileBytes)
-        try data.write(to: fileURL)
+        try fileManager.save(bytes: fileBytes, to: user.avatarURL(with: fileName))
         user.avatar = fileName
         try user.save()
         

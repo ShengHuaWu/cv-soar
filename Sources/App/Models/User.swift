@@ -6,6 +6,7 @@
 //
 
 import PostgreSQLProvider
+import Foundation
 
 final class User: Model {
     static let idKey = "id"
@@ -87,3 +88,23 @@ extension User: JSONConvertible {
 }
 
 extension User: ResponseRepresentable {}
+
+extension Droplet {
+    static var publicDirectoryURL: URL {
+        return URL(fileURLWithPath: workingDirectory()).appendingPathComponent("Public", isDirectory: true)
+    }
+}
+
+extension User {
+    var avatarURL: URL? {
+        guard let avatar = avatar, !avatar.isEmpty else {
+            return nil
+        }
+        
+        return Droplet.publicDirectoryURL.appendingPathExtension(avatar)
+    }
+    
+    func avatarURL(with fileName: String) -> URL {
+        return Droplet.publicDirectoryURL.appendingPathComponent(fileName)
+    }
+}
