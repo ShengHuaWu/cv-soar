@@ -77,9 +77,11 @@ extension UserController {
         if let avatar = user.avatar, !avatar.isEmpty {
             let avatarURL = Droplet.publicDirectoryURL.appendingPathExtension(avatar)
             let fileManager = FileManager.default
-            // TODO: Check if url isn't a directory
-            if fileManager.fileExists(atPath: avatarURL.path) {
-                try fileManager.removeItem(at: avatarURL)
+            var isDirectory: ObjCBool = false
+            if fileManager.fileExists(atPath: avatarURL.path, isDirectory: &isDirectory) {
+                if !isDirectory.boolValue {
+                    try fileManager.removeItem(at: avatarURL)
+                }
             }
         }
         
