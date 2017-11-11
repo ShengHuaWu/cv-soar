@@ -12,10 +12,6 @@ extension Droplet {
     static var publicDirectoryURL: URL {
         return URL(fileURLWithPath: workingDirectory()).appendingPathComponent("Public", isDirectory: true)
     }
-    
-    static var resourcesDirectory: String {
-        return "Resources"
-    }
 }
 
 final class UserController {
@@ -38,6 +34,7 @@ final class UserController {
         user.lastName = newUser.lastName
         user.firstName = newUser.firstName
         user.email = newUser.email
+        user.avatar = newUser.avatar
         try user.save()
         return user
     }
@@ -75,20 +72,25 @@ extension UserController {
             throw Abort.badRequest
         }
         
-        let fileName = UUID().uuidString + "." + fileExtension
-        let fileURL = Droplet.publicDirectoryURL.appendingPathComponent(Droplet.resourcesDirectory, isDirectory: true).appendingPathComponent(fileName)
-        
-        do {
-            let data = Data(bytes: fileBytes)
-            try data.write(to: fileURL)
-        } catch {
-            throw Abort.serverError
+        let user = try request.parameters.next(User.self)
+        // Remove previous avatar image
+        if let avatar = user.avatar, !avatar.isEmpty {
+            let avatarURL = Droplet.publicDirectoryURL.appendingPathExtension(avatar)
+            let fileManager = FileManager.default
+            // TODO: Check if url isn't a directory
+            if fileManager.fileExists(atPath: avatarURL.path) {
+                try fileManager.removeItem(at: avatarURL)
+            }
         }
         
-        let user = try request.parameters.next(User.self)
-        let port = request.uri.port ?? 80
-        user.avatar = request.uri.scheme + "://" + request.uri.hostname + ":\(port)" + "/" + Droplet.resourcesDirectory + "/" + fileName
+        // Save new avatar image
+        let fileName = UUID().uuidString + "." + fileExtension
+        let fileURL = Droplet.publicDirectoryURL.appendingPathComponent(fileName)
+        let data = Data(bytes: fileBytes)
+        try data.write(to: fileURL)
+        user.avatar = fileName
         try user.save()
+        
         return try user.makeJSON()
     }
 }
