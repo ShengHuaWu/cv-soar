@@ -1,13 +1,13 @@
 //
-//  ExperienceController.swift
+//  ExperiencesController.swift
 //  App
 //
-//  Created by ShengHua Wu on 19/11/2017.
+//  Created by ShengHua Wu on 25/11/2017.
 //
 
-import PostgreSQLProvider
+import Foundation
 
-final class ExperienceController {
+final class ExperiencesController {
     func getAll(request: Request) throws -> ResponseRepresentable {
         return try Experience.all().makeJSON()
     }
@@ -41,10 +41,10 @@ final class ExperienceController {
     }
 }
 
-extension ExperienceController: ResourceRepresentable {
+extension ExperiencesController: ResourceRepresentable {
     typealias Model = Experience
     
-    func makeResource() -> Resource<ExperienceController.Model> {
+    func makeResource() -> Resource<ExperiencesController.Model> {
         return Resource(
             index: getAll,
             store: create,

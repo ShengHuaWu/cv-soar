@@ -2,11 +2,11 @@ import Vapor
 
 extension Droplet {
     func setupRoutes() throws {
-        let userController = UserController()
-        resource("users", userController)
-        userController.addRoutes(self)
+        let usersController = UsersController()
+        resource("users", usersController)
+        usersController.addRoutes(self)
         
-        let experienceController = ExperienceController()
-        resource("experiences", experienceController)
+        let experiencesController = ExperiencesController()
+        resource("experiences", experiencesController)
     }
 }

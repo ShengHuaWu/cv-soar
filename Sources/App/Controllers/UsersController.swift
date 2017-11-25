@@ -1,14 +1,13 @@
 //
-//  UserController.swift
+//  UsersController.swift
 //  App
 //
-//  Created by ShengHua Wu on 28/10/2017.
+//  Created by ShengHua Wu on 25/11/2017.
 //
 
-import PostgreSQLProvider
 import Foundation
 
-final class UserController {
+final class UsersController {
     private let fileManager: StaticFileManager
     
     init(fileManager: StaticFileManager = StaticFileManager()) {
@@ -45,10 +44,10 @@ final class UserController {
     }
 }
 
-extension UserController: ResourceRepresentable {
+extension UsersController: ResourceRepresentable {
     typealias Model = User
     
-    func makeResource() -> Resource<UserController.Model> {
+    func makeResource() -> Resource<UsersController.Model> {
         return Resource(
             index: getAll,
             store: create,
@@ -59,7 +58,7 @@ extension UserController: ResourceRepresentable {
     }
 }
 
-extension UserController {
+extension UsersController {
     func addRoutes(_ droplet: Droplet) {
         let usersGroup = droplet.grouped("users")
         usersGroup.post(User.parameter, "avatar", handler: uploadAvatar)
@@ -68,7 +67,7 @@ extension UserController {
     func uploadAvatar(request: Request) throws -> ResponseRepresentable {
         guard let fileBytes = request.formData?["avatar"]?.part.body,
             let fileExtension = request.data["extension"]?.string else {
-            throw Abort.badRequest
+                throw Abort.badRequest
         }
         
         let user = try request.parameters.next(User.self)
