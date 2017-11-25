@@ -8,5 +8,8 @@ extension Droplet {
         
         let experiencesController = ExperiencesController()
         resource("experiences", experiencesController)
+        
+        let skillsController = SkillsController()
+        resource("skills", skillsController)
     }
 }
