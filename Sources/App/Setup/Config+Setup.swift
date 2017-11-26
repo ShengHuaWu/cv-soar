@@ -17,5 +17,6 @@ extension Config {
         preparations.append(User.self)
         preparations.append(Experience.self)
         preparations.append(Skill.self)
+        preparations.append(Education.self)
     }
 }

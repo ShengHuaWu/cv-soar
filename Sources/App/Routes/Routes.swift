@@ -11,5 +11,8 @@ extension Droplet {
         
         let skillsController = SkillsController()
         resource("skills", skillsController)
+        
+        let educationsController = EducationsController()
+        resource("educations", educationsController)
     }
 }
