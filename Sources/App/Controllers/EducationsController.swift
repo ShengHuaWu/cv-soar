@@ -9,7 +9,8 @@ import Foundation
 
 final class EducationsController {
     func getAll(request: Request) throws -> ResponseRepresentable {
-        return try Education.all().makeJSON()
+        let user = try request.parameters.next(User.self)
+        return try user.educations.all().makeJSON()
     }
     
     func getOne(request: Request, education: Education) throws -> ResponseRepresentable {

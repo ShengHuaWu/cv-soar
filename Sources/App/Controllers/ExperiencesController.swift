@@ -9,7 +9,8 @@ import Foundation
 
 final class ExperiencesController {
     func getAll(request: Request) throws -> ResponseRepresentable {
-        return try Experience.all().makeJSON()
+        let user = try request.parameters.next(User.self)
+        return try user.experiences.all().makeJSON()
     }
     
     func getOne(request: Request, experience: Experience) throws -> ResponseRepresentable {

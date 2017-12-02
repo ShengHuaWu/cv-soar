@@ -62,9 +62,18 @@ extension UsersController {
     func addRoutes(_ droplet: Droplet) {
         let usersGroup = droplet.grouped("users")
         usersGroup.post(User.parameter, "avatar", handler: uploadAvatar)
-        usersGroup.get(User.parameter, "experiences", handler: experiences)
-        usersGroup.get(User.parameter, "educations", handler: educations)
-        usersGroup.get(User.parameter, "skills", handler: skills)
+        
+        let userExperiencesGroup = usersGroup.grouped(User.parameter)
+        let experiencesController = ExperiencesController()
+        userExperiencesGroup.resource("experiences", experiencesController)
+        
+        let userEducationsGroup = usersGroup.grouped(User.parameter)
+        let educationsController = EducationsController()
+        userEducationsGroup.resource("educations", educationsController)
+        
+        let userSkillsGroup = usersGroup.grouped(User.parameter)
+        let skillsController = SkillsController()
+        userSkillsGroup.resource("skills", skillsController)
     }
     
     func uploadAvatar(request: Request) throws -> ResponseRepresentable {
@@ -86,21 +95,6 @@ extension UsersController {
         try user.save()
         
         return try user.makeJSON()
-    }
-    
-    func experiences(request: Request) throws -> ResponseRepresentable {
-        let user = try request.parameters.next(User.self)
-        return try user.experiences.all().makeJSON()
-    }
-    
-    func educations(request: Request) throws -> ResponseRepresentable {
-        let user = try request.parameters.next(User.self)
-        return try user.educations.all().makeJSON()
-    }
-    
-    func skills(request: Request) throws -> ResponseRepresentable {
-        let user = try request.parameters.next(User.self)
-        return try user.skills.all().makeJSON()
     }
 }
 
