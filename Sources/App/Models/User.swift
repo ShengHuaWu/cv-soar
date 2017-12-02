@@ -110,7 +110,15 @@ extension User {
 }
 
 extension User {
-    var experience: Children<User, Experience> {
+    var experiences: Children<User, Experience> {
+        return children()
+    }
+    
+    var educations: Children<User, Education> {
+        return children()
+    }
+    
+    var skills: Children<User, Skill> {
         return children()
     }
 }
