@@ -14,8 +14,9 @@ final class Experience: Model {
     static let locationKey = "location"
     static let descriptionKey = "description"
     static let linksKey = "links"
-    static let startDateKey = "startDate"
-    static let endDateKey = "endDate"
+    static let startDateKey = "start_date"
+    static let endDateKey = "end_date"
+    static let userIDKey = "user_id"
     
     let storage = Storage()
 
@@ -26,8 +27,9 @@ final class Experience: Model {
     var links: String?
     var startDate: Date
     var endDate: Date?
+    let userID: Identifier
     
-    init(title: String, company: String, location: String, description: String?, links: String?, startDate: Date, endDate: Date?) {
+    init(title: String, company: String, location: String, description: String?, links: String?, startDate: Date, endDate: Date?, userID: Identifier) {
         self.title = title
         self.company = company
         self.location = location
@@ -35,6 +37,7 @@ final class Experience: Model {
         self.links = links
         self.startDate = startDate
         self.endDate = endDate
+        self.userID = userID
     }
     
     init(row: Row) throws {
@@ -45,6 +48,7 @@ final class Experience: Model {
         self.links = try row.get(Experience.linksKey)
         self.startDate = try row.get(Experience.startDateKey)
         self.endDate = try row.get(Experience.endDateKey)
+        self.userID = try row.get(Experience.userIDKey)
     }
     
     func makeRow() throws -> Row {
@@ -56,6 +60,7 @@ final class Experience: Model {
         try row.set(Experience.linksKey, links)
         try row.set(Experience.startDateKey, startDate)
         try row.set(Experience.endDateKey, endDate)
+        try row.set(Experience.userIDKey, userID)
         
         return row
     }
@@ -72,6 +77,7 @@ extension Experience: Preparation {
             creator.string(Experience.linksKey, optional: true)
             creator.date(Experience.startDateKey)
             creator.date(Experience.endDateKey, optional: true)
+            creator.parent(User.self, optional: false)
         }
     }
     
@@ -89,8 +95,9 @@ extension Experience: JSONConvertible {
         let links: String? = try json.get(Experience.linksKey)
         let startDate: Date = try json.get(Experience.startDateKey)
         let endDate: Date? = try json.get(Experience.endDateKey)
+        let userID: Identifier = try json.get(Experience.userIDKey)
         
-        self.init(title: title, company: company, location: location, description: description, links: links, startDate: startDate, endDate: endDate)
+        self.init(title: title, company: company, location: location, description: description, links: links, startDate: startDate, endDate: endDate, userID: userID)
     }
     
     func makeJSON() throws -> JSON {
@@ -103,9 +110,16 @@ extension Experience: JSONConvertible {
         try json.set(Experience.linksKey, links ?? "")
         try json.set(Experience.startDateKey, startDate)
         try json.set(Experience.endDateKey, endDate)
+        try json.set(Experience.userIDKey, userID)
         
         return json
     }
 }
 
 extension Experience: ResponseRepresentable {}
+
+extension Experience {
+    var user: Parent<Experience, User> {
+        return parent(id: userID)
+    }
+}

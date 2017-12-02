@@ -108,3 +108,9 @@ extension User {
         return Droplet.publicDirectoryURL.appendingPathComponent(fileName)
     }
 }
+
+extension User {
+    var experience: Children<User, Experience> {
+        return children()
+    }
+}

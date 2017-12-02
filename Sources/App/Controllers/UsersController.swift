@@ -62,6 +62,7 @@ extension UsersController {
     func addRoutes(_ droplet: Droplet) {
         let usersGroup = droplet.grouped("users")
         usersGroup.post(User.parameter, "avatar", handler: uploadAvatar)
+        usersGroup.get(User.parameter, "experiences", handler: experiences)
     }
     
     func uploadAvatar(request: Request) throws -> ResponseRepresentable {
@@ -83,6 +84,11 @@ extension UsersController {
         try user.save()
         
         return try user.makeJSON()
+    }
+    
+    func experiences(request: Request) throws -> ResponseRepresentable {
+        let user = try request.parameters.next(User.self)
+        return try user.experience.all().makeJSON()
     }
 }
 

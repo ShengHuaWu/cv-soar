@@ -13,8 +13,8 @@ final class Education: Model {
     static let degreeKey = "degree"
     static let descriptionKey = "description"
     static let linksKey = "links"
-    static let startDateKey = "startDate"
-    static let endDateKey = "endDate"
+    static let startDateKey = "start_date"
+    static let endDateKey = "end_date"
     
     let storage = Storage()
     
