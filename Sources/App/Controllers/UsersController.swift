@@ -14,25 +14,35 @@ final class UsersController {
         self.fileManager = fileManager
     }
     
-    func getAll(request: Request) throws -> ResponseRepresentable {
-        return try User.all().makeJSON()
-    }
-    
     func getOne(request: Request, user: User) throws -> ResponseRepresentable {
         return user
     }
     
-    func create(request: Request) throws -> ResponseRepresentable {
+    func signup(request: Request) throws -> ResponseRepresentable {
+        // TODO: Check if user is duplicated
         let user = try request.user()
         try user.save()
-        return user
+        
+        guard let userID = user.id else {
+            throw Abort.serverError
+        }
+        
+        // Create a bearer token
+        let token = Token(token: UUID().uuidString, userID: userID)
+        try token.save()
+        
+        return try JSON(node: ["user": user.makeJSON(), "token": token.makeJSON()])
     }
+    
+    // TODO: Implement login feature
+//    func login(request: Request) throws -> ResponseRepresentable {
+//
+//    }
     
     func update(request: Request, user: User) throws -> ResponseRepresentable {
         let newUser = try request.user()
         user.lastName = newUser.lastName
         user.firstName = newUser.firstName
-        user.email = newUser.email
         user.avatar = newUser.avatar
         try user.save()
         return user
@@ -49,8 +59,6 @@ extension UsersController: ResourceRepresentable {
     
     func makeResource() -> Resource<UsersController.Model> {
         return Resource(
-            index: getAll,
-            store: create,
             show: getOne,
             update: update,
             destroy: delete
@@ -99,10 +107,12 @@ extension UsersController {
 }
 
 extension Request {
-    fileprivate func user() throws -> User {
-//        guard let json = json else { throw Abort.badRequest }
-//
-//        return try User(json: json)
+    fileprivate func authedUser() throws -> User {
         return try auth.assertAuthenticated()
+    }
+    
+    fileprivate func user() throws -> User {
+        guard let json = json else { throw Abort.badRequest }
+        return try User(json: json)
     }
 }

@@ -14,19 +14,22 @@ final class User: Model {
     static let lastNameKey = "lastName"
     static let firstNameKey = "firstName"
     static let emailKey = "email"
+    static let passwordKey = "password"
     static let avatarKey = "avatar"
     
     let storage = Storage()
     
     var lastName: String
     var firstName: String
-    var email: String
+    let email: String
+    let password: String
     var avatar: String?
     
-    init(lastName: String, firstName: String, email: String, avatar: String?) {
+    init(lastName: String, firstName: String, email: String, password: String, avatar: String?) {
         self.lastName = lastName
         self.firstName = firstName
         self.email = email
+        self.password = password
         self.avatar = avatar
     }
     
@@ -34,6 +37,7 @@ final class User: Model {
         self.lastName = try row.get(User.lastNameKey)
         self.firstName = try row.get(User.firstNameKey)
         self.email = try row.get(User.emailKey)
+        self.password = try row.get(User.passwordKey)
         self.avatar = try row.get(User.avatarKey)
     }
     
@@ -42,6 +46,7 @@ final class User: Model {
         try row.set(User.lastNameKey, lastName)
         try row.set(User.firstNameKey, firstName)
         try row.set(User.emailKey, email)
+        try row.set(User.passwordKey, password)
         try row.set(User.avatarKey, avatar)
         
         return row
@@ -55,10 +60,8 @@ extension User: Preparation {
             creator.string(User.lastNameKey)
             creator.string(User.firstNameKey)
             creator.string(User.emailKey)
-        }
-        
-        try database.modify(self) { (modifier) in
-            modifier.string(User.avatarKey, optional: true)
+            creator.string(User.passwordKey)
+            creator.string(User.avatarKey, optional: true)
         }
     }
     
@@ -72,8 +75,9 @@ extension User: JSONConvertible {
         let lastName: String = try json.get(User.lastNameKey)
         let firstName: String = try json.get(User.firstNameKey)
         let email: String = try json.get(User.emailKey)
+        let password: String = try json.get(User.passwordKey)
         let avatar: String? = try json.get(User.avatarKey)
-        self.init(lastName: lastName, firstName: firstName, email: email, avatar: avatar)
+        self.init(lastName: lastName, firstName: firstName, email: email, password: password, avatar: avatar)
     }
     
     func makeJSON() throws -> JSON {
