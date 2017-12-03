@@ -59,8 +59,8 @@ extension UsersController: ResourceRepresentable {
 }
 
 extension UsersController {
-    func addRoutes(_ droplet: Droplet) {
-        let usersGroup = droplet.grouped("users")
+    func addRoutes(_ routeBuilder: RouteBuilder) {
+        let usersGroup = routeBuilder.grouped("users")
         usersGroup.post(User.parameter, "avatar", handler: uploadAvatar)
         
         let userExperiencesGroup = usersGroup.grouped(User.parameter)
@@ -100,8 +100,9 @@ extension UsersController {
 
 extension Request {
     fileprivate func user() throws -> User {
-        guard let json = json else { throw Abort.badRequest }
-        
-        return try User(json: json)
+//        guard let json = json else { throw Abort.badRequest }
+//
+//        return try User(json: json)
+        return try auth.assertAuthenticated()
     }
 }

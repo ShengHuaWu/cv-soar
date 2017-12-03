@@ -1,9 +1,13 @@
 import Vapor
+import AuthProvider
 
 extension Droplet {
     func setupRoutes() throws {
+        let tokenMiddleware = TokenAuthenticationMiddleware(User.self)
+        let authed = grouped(tokenMiddleware)
+        
         let usersController = UsersController()
-        resource("users", usersController)
-        usersController.addRoutes(self)
+        authed.resource("users", usersController)
+        usersController.addRoutes(authed)
     }
 }

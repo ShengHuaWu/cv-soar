@@ -7,6 +7,7 @@
 
 import PostgreSQLProvider
 import Foundation
+import AuthProvider
 
 final class User: Model {
     static let idKey = "id"
@@ -121,4 +122,8 @@ extension User {
     var skills: Children<User, Skill> {
         return children()
     }
+}
+
+extension User: TokenAuthenticatable {
+    typealias TokenType = Token
 }
