@@ -11,8 +11,8 @@ import AuthProvider
 
 final class User: Model {
     static let idKey = "id"
-    static let lastNameKey = "lastName"
-    static let firstNameKey = "firstName"
+    static let lastNameKey = "last_name"
+    static let firstNameKey = "first_name"
     static let emailKey = "email"
     static let passwordKey = "password"
     static let avatarKey = "avatar"
@@ -115,6 +115,10 @@ extension User {
 }
 
 extension User {
+    static func find(with email: String) throws -> User? {
+        return try makeQuery().filter(User.emailKey, email).first()
+    }
+    
     var experiences: Children<User, Experience> {
         return children()
     }
@@ -125,6 +129,10 @@ extension User {
     
     var skills: Children<User, Skill> {
         return children()
+    }
+    
+    func token() throws -> Token? {
+        return try children().first()
     }
 }
 

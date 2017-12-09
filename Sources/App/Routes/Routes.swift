@@ -9,7 +9,8 @@ extension Droplet {
         authed.resource("users", usersController)
         usersController.addRoutes(authed)
         
-        post("users", "signup", handler: usersController.signup)
-//        post("users", "login", handler: )
+        let unauthed = grouped("users")
+        unauthed.post("signup", handler: usersController.signup)
+        unauthed.post("login", handler: usersController.login)
     }
 }

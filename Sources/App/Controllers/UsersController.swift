@@ -8,6 +8,9 @@
 import Foundation
 
 final class UsersController {
+    static let userKey = "user"
+    static let tokenKey = "token"
+    
     private let fileManager: StaticFileManager
     
     init(fileManager: StaticFileManager = StaticFileManager()) {
@@ -19,8 +22,11 @@ final class UsersController {
     }
     
     func signup(request: Request) throws -> ResponseRepresentable {
-        // TODO: Check if user is duplicated
         let user = try request.user()
+        guard try User.find(with: user.email) == nil else {
+            throw Abort.badRequest
+        }
+        
         try user.save()
         
         guard let userID = user.id else {
@@ -31,13 +37,25 @@ final class UsersController {
         let token = Token(token: UUID().uuidString, userID: userID)
         try token.save()
         
-        return try JSON(node: ["user": user.makeJSON(), "token": token.makeJSON()])
+        return try JSON(node: [UsersController.userKey: user.makeJSON(), UsersController.tokenKey: token.makeJSON()])
     }
     
-    // TODO: Implement login feature
-//    func login(request: Request) throws -> ResponseRepresentable {
-//
-//    }
+    func login(request: Request) throws -> ResponseRepresentable {
+        let user = try request.user()
+        guard let userInDB = try User.find(with: user.email) else {
+            throw Abort.badRequest
+        }
+        
+        if userInDB.password == user.password {
+            guard let token = try userInDB.token() else {
+                throw Abort.serverError
+            }
+            
+            return try JSON(node: [UsersController.userKey: userInDB.makeJSON(), UsersController.tokenKey: token.makeJSON()])
+        } else {
+            throw Abort.badRequest
+        }
+    }
     
     func update(request: Request, user: User) throws -> ResponseRepresentable {
         let newUser = try request.user()
