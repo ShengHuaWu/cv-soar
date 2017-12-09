@@ -125,7 +125,7 @@ extension UsersController {
 }
 
 extension Request {
-    fileprivate func authedUser() throws -> User {
+    func authedUser() throws -> User {
         return try auth.assertAuthenticated()
     }
     

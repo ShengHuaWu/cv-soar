@@ -4,7 +4,8 @@ import AuthProvider
 extension Droplet {
     func setupRoutes() throws {
         let tokenMiddleware = TokenAuthenticationMiddleware(User.self)
-        let authed = grouped(tokenMiddleware)
+        let userTokenMatchMiddleware = UserTokenMatchMiddleware()
+        let authed = grouped([tokenMiddleware, userTokenMatchMiddleware])
         let usersController = UsersController()
         authed.resource("users", usersController)
         usersController.addRoutes(authed)

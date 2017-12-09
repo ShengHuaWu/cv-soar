@@ -9,7 +9,7 @@ import Foundation
 
 final class ExperiencesController {
     func getAll(request: Request) throws -> ResponseRepresentable {
-        let user = try request.parameters.next(User.self)
+        let user = try request.authedUser()
         return try user.experiences.all().makeJSON()
     }
     
