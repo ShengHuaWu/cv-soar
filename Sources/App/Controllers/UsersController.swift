@@ -8,9 +8,6 @@
 import Foundation
 
 final class UsersController {
-    static let userKey = "user"
-    static let tokenKey = "token"
-    
     private let fileManager: StaticFileManager
     
     init(fileManager: StaticFileManager = StaticFileManager()) {
@@ -37,7 +34,7 @@ final class UsersController {
         let token = Token(token: UUID().uuidString, userID: userID)
         try token.save()
         
-        return try JSON(node: [UsersController.userKey: user.makeJSON(), UsersController.tokenKey: token.makeJSON()])
+        return user
     }
     
     func login(request: Request) throws -> ResponseRepresentable {
@@ -47,11 +44,7 @@ final class UsersController {
         }
         
         if userInDB.password == user.password {
-            guard let token = try userInDB.token() else {
-                throw Abort.serverError
-            }
-            
-            return try JSON(node: [UsersController.userKey: userInDB.makeJSON(), UsersController.tokenKey: token.makeJSON()])
+            return userInDB
         } else {
             throw Abort.badRequest
         }
@@ -61,6 +54,7 @@ final class UsersController {
         let newUser = try request.user()
         user.lastName = newUser.lastName
         user.firstName = newUser.firstName
+        user.password = newUser.password
         user.avatar = newUser.avatar
         try user.save()
         return user

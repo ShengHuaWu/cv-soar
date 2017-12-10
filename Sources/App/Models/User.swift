@@ -10,19 +10,21 @@ import Foundation
 import AuthProvider
 
 final class User: Model {
+    static let userKey = "user"
     static let idKey = "id"
     static let lastNameKey = "last_name"
     static let firstNameKey = "first_name"
     static let emailKey = "email"
     static let passwordKey = "password"
     static let avatarKey = "avatar"
+    static let tokenKey = "token"
     
     let storage = Storage()
     
     var lastName: String
     var firstName: String
     let email: String
-    let password: String
+    var password: String
     var avatar: String?
     
     init(lastName: String, firstName: String, email: String, password: String, avatar: String?) {
@@ -88,7 +90,11 @@ extension User: JSONConvertible {
         try json.set(User.emailKey, email)
         try json.set(User.avatarKey, avatar ?? "")
         
-        return json
+        if let token = try token() {
+            try json.set(User.tokenKey, token.token)
+        }
+        
+        return try JSON(node: [User.userKey: json])
     }
 }
 
