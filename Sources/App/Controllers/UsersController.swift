@@ -8,6 +8,7 @@
 import Foundation
 
 final class UsersController {
+    static let userKey = "user"
     static let emailKey = "email"
     static let passwordKey = "password"
     static let avatarKey = "avatar"
@@ -33,7 +34,7 @@ final class UsersController {
         let token = Token(token: UUID().uuidString, userID: userID)
         try token.save()
         
-        return user
+        return try JSON(node: [UsersController.userKey: user])
     }
     
     func login(request: Request) throws -> ResponseRepresentable {
@@ -44,11 +45,11 @@ final class UsersController {
             throw Abort.badRequest
         }
         
-        return user
+        return try JSON(node: [UsersController.userKey: user])
     }
     
     private func getOne(request: Request, user: User) throws -> ResponseRepresentable {
-        return user
+        return try JSON(node: [UsersController.userKey: user])
     }
     
     private func update(request: Request, user: User) throws -> ResponseRepresentable {
@@ -61,7 +62,7 @@ final class UsersController {
         user.avatar = newUser.avatar
         try user.save()
         
-        return user
+        return try JSON(node: [UsersController.userKey: user])
     }
 }
 

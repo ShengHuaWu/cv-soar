@@ -8,31 +8,34 @@
 import Foundation
 
 final class SkillsController {
+    static let skillsKey = "skills"
+    static let skillKey = "skill"
+    
     private func getAll(request: Request) throws -> ResponseRepresentable {
         let user = try request.authedUser()
-        return try user.skills.all().makeJSON()
+        return try JSON(node: [SkillsController.skillsKey: user.skills.all()])
     }
     
     private func getOne(request: Request, skill: Skill) throws -> ResponseRepresentable {
-        return skill
+        return try JSON(node: [SkillsController.skillKey: skill])
     }
     
     private func create(request: Request) throws -> ResponseRepresentable {
         let skill = try request.skill()
         try skill.save()
-        return skill
+        return try JSON(node: [SkillsController.skillKey: skill])
     }
     
     private func update(request: Request, skill: Skill) throws -> ResponseRepresentable {
         let newSkill = try request.skill()
         skill.title = newSkill.title
         try skill.save()
-        return skill
+        return try JSON(node: [SkillsController.skillKey: skill])
     }
     
     private func delete(request: Request, skill: Skill) throws -> ResponseRepresentable {
         try skill.delete()
-        return skill
+        return try JSON(node: [SkillsController.skillKey: skill])
     }
 }
 

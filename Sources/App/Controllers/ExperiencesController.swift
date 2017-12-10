@@ -8,19 +8,22 @@
 import Foundation
 
 final class ExperiencesController {
+    static let experiencesKey = "experiences"
+    static let experienceKey = "experience"
+    
     private func getAll(request: Request) throws -> ResponseRepresentable {
         let user = try request.authedUser()
-        return try user.experiences.all().makeJSON()
+        return try JSON(node: [ExperiencesController.experiencesKey: user.experiences.all()])
     }
     
     private func getOne(request: Request, experience: Experience) throws -> ResponseRepresentable {
-        return experience
+        return try JSON(node: [ExperiencesController.experienceKey: experience])
     }
     
     private func create(request: Request) throws -> ResponseRepresentable {
         let experience = try request.experience()
         try experience.save()
-        return experience
+        return try JSON(node: [ExperiencesController.experienceKey: experience])
     }
     
     private func update(request: Request, experience: Experience) throws -> ResponseRepresentable {
@@ -33,12 +36,12 @@ final class ExperiencesController {
         experience.startDate = newExperience.startDate
         experience.endDate = newExperience.endDate
         try experience.save()
-        return experience
+        return try JSON(node: [ExperiencesController.experienceKey: experience])
     }
     
     func delete(request: Request, experience: Experience) throws -> ResponseRepresentable {
         try experience.delete()
-        return experience
+        return try JSON(node: [ExperiencesController.experienceKey: experience])
     }
 }
 
