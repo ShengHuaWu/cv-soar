@@ -9,8 +9,7 @@ extension Droplet {
         unauthed.post("login", handler: usersController.login)
         
         let tokenMiddleware = TokenAuthenticationMiddleware(User.self)
-        let userTokenMatchMiddleware = UserTokenMatchMiddleware()
-        let authed = grouped([tokenMiddleware, userTokenMatchMiddleware])
+        let authed = grouped(tokenMiddleware)
         authed.resource("users", usersController)
         usersController.addAuthedRoutes(authed)
     }

@@ -8,22 +8,22 @@
 import Foundation
 
 final class EducationsController {
-    func getAll(request: Request) throws -> ResponseRepresentable {
+    private func getAll(request: Request) throws -> ResponseRepresentable {
         let user = try request.authedUser()
         return try user.educations.all().makeJSON()
     }
     
-    func getOne(request: Request, education: Education) throws -> ResponseRepresentable {
+    private func getOne(request: Request, education: Education) throws -> ResponseRepresentable {
         return education
     }
     
-    func create(request: Request) throws -> ResponseRepresentable {
+    private func create(request: Request) throws -> ResponseRepresentable {
         let education = try request.education()
         try education.save()
         return education
     }
     
-    func update(request: Request, education: Education) throws -> ResponseRepresentable {
+    private func update(request: Request, education: Education) throws -> ResponseRepresentable {
         let newEducation = try request.education()
         education.school = newEducation.school
         education.degree = newEducation.degree
@@ -35,7 +35,7 @@ final class EducationsController {
         return education
     }
     
-    func delete(request: Request, education: Education) throws -> ResponseRepresentable {
+    private func delete(request: Request, education: Education) throws -> ResponseRepresentable {
         try education.delete()
         return education
     }

@@ -8,29 +8,29 @@
 import Foundation
 
 final class SkillsController {
-    func getAll(request: Request) throws -> ResponseRepresentable {
+    private func getAll(request: Request) throws -> ResponseRepresentable {
         let user = try request.authedUser()
         return try user.skills.all().makeJSON()
     }
     
-    func getOne(request: Request, skill: Skill) throws -> ResponseRepresentable {
+    private func getOne(request: Request, skill: Skill) throws -> ResponseRepresentable {
         return skill
     }
     
-    func create(request: Request) throws -> ResponseRepresentable {
+    private func create(request: Request) throws -> ResponseRepresentable {
         let skill = try request.skill()
         try skill.save()
         return skill
     }
     
-    func update(request: Request, skill: Skill) throws -> ResponseRepresentable {
+    private func update(request: Request, skill: Skill) throws -> ResponseRepresentable {
         let newSkill = try request.skill()
         skill.title = newSkill.title
         try skill.save()
         return skill
     }
     
-    func delete(request: Request, skill: Skill) throws -> ResponseRepresentable {
+    private func delete(request: Request, skill: Skill) throws -> ResponseRepresentable {
         try skill.delete()
         return skill
     }

@@ -47,15 +47,17 @@ final class UsersController {
         return user
     }
     
-    func getOne(request: Request, user: User) throws -> ResponseRepresentable {
+    private func getOne(request: Request, user: User) throws -> ResponseRepresentable {
         return user
     }
     
-    func update(request: Request, user: User) throws -> ResponseRepresentable {
+    private func update(request: Request, user: User) throws -> ResponseRepresentable {
         let newUser = try request.user()
         user.lastName = newUser.lastName
         user.firstName = newUser.firstName
-        user.password = newUser.password
+        if (newUser.password.count > 0) {
+            user.password = newUser.password
+        }
         user.avatar = newUser.avatar
         try user.save()
         

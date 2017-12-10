@@ -8,22 +8,22 @@
 import Foundation
 
 final class ExperiencesController {
-    func getAll(request: Request) throws -> ResponseRepresentable {
+    private func getAll(request: Request) throws -> ResponseRepresentable {
         let user = try request.authedUser()
         return try user.experiences.all().makeJSON()
     }
     
-    func getOne(request: Request, experience: Experience) throws -> ResponseRepresentable {
+    private func getOne(request: Request, experience: Experience) throws -> ResponseRepresentable {
         return experience
     }
     
-    func create(request: Request) throws -> ResponseRepresentable {
+    private func create(request: Request) throws -> ResponseRepresentable {
         let experience = try request.experience()
         try experience.save()
         return experience
     }
     
-    func update(request: Request, experience: Experience) throws -> ResponseRepresentable {
+    private func update(request: Request, experience: Experience) throws -> ResponseRepresentable {
         let newExperience = try request.experience()
         experience.title = newExperience.title
         experience.company = newExperience.company
