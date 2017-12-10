@@ -77,7 +77,7 @@ extension User: JSONConvertible {
         let lastName: String = try json.get(User.lastNameKey)
         let firstName: String = try json.get(User.firstNameKey)
         let email: String = try json.get(User.emailKey)
-        let password: String = try json.get(User.passwordKey)
+        let password: String = json[User.passwordKey]?.string ?? ""
         let avatar: String? = try json.get(User.avatarKey)
         self.init(lastName: lastName, firstName: firstName, email: email, password: password, avatar: avatar)
     }

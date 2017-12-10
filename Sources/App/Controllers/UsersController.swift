@@ -8,14 +8,15 @@
 import Foundation
 
 final class UsersController {
+    static let emailKey = "email"
+    static let passwordKey = "password"
+    static let avatarKey = "avatar"
+    static let extensionKey = "extension"
+    
     private let fileManager: StaticFileManager
     
     init(fileManager: StaticFileManager = StaticFileManager()) {
         self.fileManager = fileManager
-    }
-    
-    func getOne(request: Request, user: User) throws -> ResponseRepresentable {
-        return user
     }
     
     func signup(request: Request) throws -> ResponseRepresentable {
@@ -25,12 +26,10 @@ final class UsersController {
         }
         
         try user.save()
-        
         guard let userID = user.id else {
             throw Abort.serverError
         }
         
-        // Create a bearer token
         let token = Token(token: UUID().uuidString, userID: userID)
         try token.save()
         
@@ -38,16 +37,18 @@ final class UsersController {
     }
     
     func login(request: Request) throws -> ResponseRepresentable {
-        let user = try request.user()
-        guard let userInDB = try User.find(with: user.email) else {
+        guard let email = request.json?[UsersController.emailKey]?.string,
+            let password = request.json?[UsersController.passwordKey]?.string,
+            let user = try User.find(with: email),
+            password == user.password else {
             throw Abort.badRequest
         }
         
-        if userInDB.password == user.password {
-            return userInDB
-        } else {
-            throw Abort.badRequest
-        }
+        return user
+    }
+    
+    func getOne(request: Request, user: User) throws -> ResponseRepresentable {
+        return user
     }
     
     func update(request: Request, user: User) throws -> ResponseRepresentable {
@@ -57,11 +58,7 @@ final class UsersController {
         user.password = newUser.password
         user.avatar = newUser.avatar
         try user.save()
-        return user
-    }
-    
-    func delete(request: Request, user: User) throws -> ResponseRepresentable {
-        try user.delete()
+        
         return user
     }
 }
@@ -72,37 +69,33 @@ extension UsersController: ResourceRepresentable {
     func makeResource() -> Resource<UsersController.Model> {
         return Resource(
             show: getOne,
-            update: update,
-            destroy: delete
+            update: update
         )
     }
 }
 
 extension UsersController {
-    func addRoutes(_ routeBuilder: RouteBuilder) {
-        let usersGroup = routeBuilder.grouped("users")
-        usersGroup.post(User.parameter, "avatar", handler: uploadAvatar)
+    func addAuthedRoutes(_ authedRoute: RouteBuilder) {
+        let authedUserRoute = authedRoute.grouped("users", User.parameter)
+        authedUserRoute.post("avatar", handler: uploadAvatar)
         
-        let userExperiencesGroup = usersGroup.grouped(User.parameter)
         let experiencesController = ExperiencesController()
-        userExperiencesGroup.resource("experiences", experiencesController)
+        authedUserRoute.resource("experiences", experiencesController)
         
-        let userEducationsGroup = usersGroup.grouped(User.parameter)
         let educationsController = EducationsController()
-        userEducationsGroup.resource("educations", educationsController)
+        authedUserRoute.resource("educations", educationsController)
         
-        let userSkillsGroup = usersGroup.grouped(User.parameter)
         let skillsController = SkillsController()
-        userSkillsGroup.resource("skills", skillsController)
+        authedUserRoute.resource("skills", skillsController)
     }
     
     func uploadAvatar(request: Request) throws -> ResponseRepresentable {
-        guard let fileBytes = request.formData?["avatar"]?.part.body,
-            let fileExtension = request.data["extension"]?.string else {
+        guard let fileBytes = request.formData?[UsersController.avatarKey]?.part.body,
+            let fileExtension = request.data[UsersController.extensionKey]?.string else {
                 throw Abort.badRequest
         }
         
-        let user = try request.parameters.next(User.self)
+        let user = try request.authedUser()
         // Remove previous avatar image
         if let avatarURL = user.avatarURL, fileManager.fileExist(at: avatarURL) {
             try fileManager.removeFile(at: avatarURL)

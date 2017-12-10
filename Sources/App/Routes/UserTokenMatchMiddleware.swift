@@ -10,9 +10,8 @@ import HTTP
 final class UserTokenMatchMiddleware: Middleware {
     func respond(to request: Request, chainingTo next: Responder) throws -> Response {
         let authedUser = try request.authedUser()
-        let user = try request.parameters.next(User.self)
-        
-        guard authedUser.id == user.id else {
+        let userID = String(request.uri.path.split(separator: "/").last!)
+        guard authedUser.id?.string == userID else {
             throw Abort.unauthorized
         }
         
