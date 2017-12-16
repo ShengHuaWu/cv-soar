@@ -17,9 +17,6 @@ final class User: Model {
     static let passwordKey = "password"
     static let avatarKey = "avatar"
     static let tokenKey = "token"
-    static let experiencesKey = "experiences"
-    static let educationsKey = "educations"
-    static let skillsKey = "skills"
     
     let storage = Storage()
     
@@ -93,9 +90,6 @@ extension User: JSONConvertible {
         try json.set(User.avatarKey, avatar ?? "")
         
         try json.set(User.tokenKey, token()?.token)
-        try json.set(User.experiencesKey, experiences.all())
-        try json.set(User.educationsKey, educations.all())
-        try json.set(User.skillsKey, skills.all())
         
         return json
     }

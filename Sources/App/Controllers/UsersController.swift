@@ -13,6 +13,9 @@ final class UsersController {
     static let passwordKey = "password"
     static let avatarKey = "avatar"
     static let extensionKey = "extension"
+    static let experiencesKey = "experiences"
+    static let educationsKey = "educations"
+    static let skillsKey = "skills"
     
     private let fileManager: StaticFileManager
     
@@ -49,7 +52,12 @@ final class UsersController {
     }
     
     private func getOne(request: Request, user: User) throws -> ResponseRepresentable {
-        return try JSON(node: [UsersController.userKey: user])
+        var json = try user.makeJSON()
+        try json.set(UsersController.experiencesKey, user.experiences.all())
+        try json.set(UsersController.educationsKey, user.educations.all())
+        try json.set(UsersController.skillsKey, user.skills.all())
+        
+        return try JSON(node: [UsersController.userKey: json])
     }
     
     private func update(request: Request, user: User) throws -> ResponseRepresentable {
