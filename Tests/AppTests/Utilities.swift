@@ -13,6 +13,7 @@ extension Droplet {
         try drop.setup()
         return drop
     }
+    
     func serveInBackground() throws {
         background {
             try! self.run()
