@@ -14,7 +14,7 @@ import Vapor
 class UserRequestTests: TestCase {
     // MARK: Properties
     let droplet = try! Droplet.testable()
-    let header = [HeaderKey.contentType: "application/json"]
+    let unauthedHeader = [HeaderKey.contentType: "application/json"]
     
     // MARK: Override Methods
     override func setUp() {
@@ -29,7 +29,7 @@ class UserRequestTests: TestCase {
     func testSignupWithSuccess() throws {
         let parameters = ["first_name": "ShengHua", "last_name": "Wu", "email": "shenghua.wu@conichi.com", "password": "0987654321"]
         let body = try Body(JSON(node: parameters))
-        let request = Request(method: .post, uri: "/users/signup", headers: header, body: body)
+        let request = Request(method: .post, uri: "/users/signup", headers: unauthedHeader, body: body)
         try droplet.testResponse(to: request)
             .assertStatus(is: .ok)
             .assertJSON("user") { json in
@@ -40,7 +40,7 @@ class UserRequestTests: TestCase {
     func testSignupWithFailureIfUserAlreadyExists() throws {
         let parameters = ["first_name": "Joseph", "last_name": "Tseng", "email": "joseph.tseng@conichi.com", "password": "0987654321"]
         let body = try Body(JSON(node: parameters))
-        let request = Request(method: .post, uri: "/users/signup", headers: header, body: body)
+        let request = Request(method: .post, uri: "/users/signup", headers: unauthedHeader, body: body)
         try droplet.testResponse(to: request)
             .assertStatus(is: .ok)
         try droplet.testResponse(to: request)
@@ -50,13 +50,13 @@ class UserRequestTests: TestCase {
     func testLoginWithSuccess() throws {
         let signupParameters = ["first_name": "Jessica", "last_name": "Lin", "email": "jessica.lin@conichi.com", "password": "0987654321"]
         let signupBody = try Body(JSON(node: signupParameters))
-        let signupRequest = Request(method: .post, uri: "/users/signup", headers: header, body: signupBody)
+        let signupRequest = Request(method: .post, uri: "/users/signup", headers: unauthedHeader, body: signupBody)
         try droplet.testResponse(to: signupRequest)
             .assertStatus(is: .ok)
         
         let loginParameters = ["email": "jessica.lin@conichi.com", "password": "0987654321"]
         let loginBody = try Body(JSON(node: loginParameters))
-        let loginRequest = Request(method: .post, uri: "/users/login", headers: header, body: loginBody)
+        let loginRequest = Request(method: .post, uri: "/users/login", headers: unauthedHeader, body: loginBody)
         try droplet.testResponse(to: loginRequest)
             .assertStatus(is: .ok)
             .assertJSON("user") { json in
@@ -67,7 +67,7 @@ class UserRequestTests: TestCase {
     func testLoginWithFailureIfUserDoesntExist() throws {
         let parameters = ["email": "alex.chang@conichi.com", "password": "0987654321"]
         let body = try Body(JSON(node: parameters))
-        let request = Request(method: .post, uri: "/users/login", headers: header, body: body)
+        let request = Request(method: .post, uri: "/users/login", headers: unauthedHeader, body: body)
         try droplet.testResponse(to: request)
             .assertStatus(is: .badRequest)
     }
@@ -90,7 +90,7 @@ class UserRequestTests: TestCase {
                 return true
         }
         
-        var authedHeader = header
+        var authedHeader = unauthedHeader
         authedHeader["Authorization"] = "Bearer \(userToken)"
         let getUserRequest = Request(method: .get, uri: "/users/\(userID)", headers: authedHeader)
         try droplet.testResponse(to: getUserRequest)
@@ -99,12 +99,20 @@ class UserRequestTests: TestCase {
                 return json["first_name"] == "David"
         }
     }
+    
+    func testGetUserWithFailureIfThereIsNoToken() throws {
+        let request = Request(method: .get, uri: "/users/1", headers: unauthedHeader)
+        try droplet.testResponse(to: request)
+            .assertStatus(is: .unauthorized)
+    }
 }
 extension UserRequestTests {
     static let allTests = [
         ("testSignupWithSuccess", testSignupWithSuccess),
         ("testSignupWithFailureIfUserAlreadyExists", testSignupWithFailureIfUserAlreadyExists),
         ("testLoginWithSuccess", testLoginWithSuccess),
-        ("testLoginWithFailureIfUserDoesntExist", testLoginWithFailureIfUserDoesntExist)
+        ("testLoginWithFailureIfUserDoesntExist", testLoginWithFailureIfUserDoesntExist),
+        ("testGetUserWithSuccess", testGetUserWithSuccess),
+        ("testGetUserWithFailureIfThereIsNoToken", testGetUserWithFailureIfThereIsNoToken)
     ]
 }
