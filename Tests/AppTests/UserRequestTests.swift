@@ -71,8 +71,35 @@ class UserRequestTests: TestCase {
         try droplet.testResponse(to: request)
             .assertStatus(is: .badRequest)
     }
+    
+    func testGetUserWithSuccess() throws {
+        let signUpParameters = ["first_name": "David", "last_name": "Henner", "email": "david.henner@conichi.com", "password": "0987654321"]
+        let signUpBody = try! Body(JSON(node: signUpParameters))
+        let signUpRequest = Request(method: .post, uri: "/users/signup", headers: [HeaderKey.contentType: "application/json"], body: signUpBody)
+        var userID = 0
+        var userToken = ""
+        try! Droplet.testable().testResponse(to: signUpRequest)
+            .assertStatus(is: .ok)
+            .assertJSON("user") { json in
+                guard let id = json["id"]?.int, let token = json["token"]?.string else {
+                    return false
+                }
+                
+                userID = id
+                userToken = token
+                return true
+        }
+        
+        var authedHeader = header
+        authedHeader["Authorization"] = "Bearer \(userToken)"
+        let getUserRequest = Request(method: .get, uri: "/users/\(userID)", headers: authedHeader)
+        try droplet.testResponse(to: getUserRequest)
+            .assertStatus(is: .ok)
+            .assertJSON("user") { json in
+                return json["first_name"] == "David"
+        }
+    }
 }
-
 extension UserRequestTests {
     static let allTests = [
         ("testSignupWithSuccess", testSignupWithSuccess),
